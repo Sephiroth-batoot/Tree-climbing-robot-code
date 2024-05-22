@@ -1,0 +1,123 @@
+#include <SoftwareSerial.h>
+SoftwareSerial BTserial(2, 3);
+char charac;
+  #define REN2 0
+  #define LEN2 1
+  #define RPWM1 5
+  #define LPWM1 6
+  
+  #define dirPin 8
+  #define stepPin 9
+  #define RPWM2 10
+  #define LPWM2 11
+  #define REN1 12
+  #define LEN1 13 
+  #define stepsPerRevolution 100
+void setup(){
+
+  //Initialize Serial Monitor
+  Serial.begin(9600);
+  //Initialize Bluetooth Serial Port
+   pinMode(stepPin, OUTPUT);
+   pinMode(dirPin, OUTPUT);
+   BTserial.begin(9600);
+  pinMode(RPWM1,OUTPUT);
+  pinMode(LPWM1,OUTPUT);
+  pinMode(LEN1,OUTPUT);
+  pinMode(REN1,OUTPUT);
+  digitalWrite(REN1,HIGH);
+  digitalWrite(LEN1,HIGH);
+  pinMode(RPWM2,OUTPUT);
+  pinMode(LPWM2,OUTPUT);
+  pinMode(LEN2,OUTPUT);
+  pinMode(REN2,OUTPUT);
+  digitalWrite(REN2,HIGH);
+  digitalWrite(LEN2,HIGH);
+}
+
+ void GoUpward() {
+    digitalWrite(dirPin, HIGH);
+for (int i=0; i < stepsPerRevolution; i++) {
+  digitalWrite(stepPin, HIGH);
+  delayMicroseconds(500);
+  digitalWrite(stepPin, LOW);
+  delayMicroseconds(500);
+}
+
+ }
+  void GoDownward() {
+    digitalWrite(dirPin, LOW);
+for (int i=0; i < stepsPerRevolution; i++) {
+  digitalWrite(stepPin, HIGH);
+  delayMicroseconds(500);
+  digitalWrite(stepPin, LOW);
+  delayMicroseconds(500);
+}
+  }
+  void OpenUp() {
+    analogWrite(RPWM1,150);
+    analogWrite(LPWM1,0);
+    analogWrite(LPWM2,0);
+    analogWrite(RPWM2,0);
+}
+  void CloseUp() {
+    analogWrite(RPWM1,0);
+    analogWrite(LPWM1,150);
+    analogWrite(LPWM2,0);
+    analogWrite(RPWM2,0);
+}
+  void OpenDown() {
+    analogWrite(RPWM2,150);
+    analogWrite(LPWM2,0);
+    analogWrite(RPWM1,0);
+    analogWrite(LPWM1,0);
+}
+  void CloseDown() {
+    analogWrite(RPWM2,0);
+    analogWrite(LPWM2,150);
+    analogWrite(LPWM1,0);
+    analogWrite(RPWM1,0);
+  }
+    void IDLE() {
+    analogWrite(RPWM2,0);
+    analogWrite(LPWM2,0);
+    analogWrite(LPWM1,0);
+    analogWrite(RPWM1,0);
+  }
+void loop() {
+if (BTserial.available())
+    {  
+        Serial.write(BTserial.read());
+    }
+ 
+    // Keep reading from Arduino Serial Monitor and send to HC-06
+    if (Serial.available())
+    {
+        BTserial.write(Serial.read());
+    }
+   charac=BTserial.read();
+    
+   switch(charac) {
+     case 'F':
+      GoUpward();
+      break;
+    case 'B':
+      GoDownward();
+      break;
+    case 'J':
+      OpenUp();
+      break;
+    case 'H':
+      CloseUp();
+      break;
+    case 'I':
+      OpenDown();
+      break;
+    case 'G':
+      CloseDown();
+      break;
+          case 'S':
+      IDLE();
+      break;
+}
+}
